@@ -3,6 +3,8 @@
 #include "AVL.h"
 using namespace std;
 
+//Matthew Grochmal
+//35490862
 // the syntax for defining a test is below. It is important for the name to be unique, but you can group multiple tests with [tags]. A test can have [multiple][tags] using that syntax.
 TEST_CASE("5 Invalid insert commands", "[insert]"){
 	// instantiate any class members that you need to test here
