@@ -4,12 +4,44 @@
 
 #include "AVL.h"
 
+#include <ios>
+#include <bits/ios_base.h>
+
 AVLTree::AVLTree() {
     root = nullptr;
 }
 
-bool AVLTree::insert(string name, string id) {
-    return false;
+Student::Student(string name, string id) {
+    this->name = name;
+    this->id = id;
+    left = nullptr;
+    right = nullptr;
+    height = 1;
+}
+
+void AVLTree::insert(const string &name, const string &id) {
+    //if empty, create leaf
+    if (root == nullptr) {
+        root = new Student (name, id);
+    }
+    //if not empty, check whether it's going left or right
+    else {
+        //moves us left or right
+        if (id < root->id) {
+            root = root->left;
+        }
+        else {
+            root = root->right;
+        }
+
+        //recursive call
+        insert(name, id);
+
+        //rechecks height and balance if needed
+
+    }
+
+
 }
 
 bool AVLTree::remove(string id) {

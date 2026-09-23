@@ -9,27 +9,23 @@
 #include <vector>
 using namespace std;
 
-struct Node {
+struct Student {
     string name;
     string id;
-    Node* left;
-    Node* right;
+    int height;
+    Student* left;
+    Student* right;
 
-    Node(string name, string id) {
-        this->name = name;
-        this->id = id;
-        left = nullptr;
-        right = nullptr;
-    }
+    Student(string name, string id);
 };
 
 class AVLTree {
 private:
-    Node* root;
+    Student* root;
 
 public:
     AVLTree();
-    bool insert(string name, string id);
+    void insert(const string &name, const string &id);
     bool remove(string id);
     string searchID(string id);
     vector<string> searchName(string name);
