@@ -27,16 +27,28 @@ int AVLTree::getHeight(const Student* node) {
 }
 
 
-Student* AVLTree::balance(Student* node) {
+Student* AVLTree::balance(Student* subRoot) {
     //right rotation or left-right rotation
-    if (getHeight(node->left) - getHeight(node->right) > 1) {
-        if (node->left->right == nullptr) {
-
+    if (getHeight(subRoot->left) - getHeight(subRoot->right) > 1) {
+        //normal right rotation
+        if (subRoot->left->right == nullptr) {
+            Student* newSubRoot = subRoot->left;
+            subRoot->left->right = subRoot;
+            subRoot->left = nullptr;
+        }
+        else {
+            //WRONG NEEDS FIX
+            subRoot->left->right->left = subRoot->left;
         }
     }
     //left rotation or right-left rotation
     else if (getHeight(node->right) - getHeight(node->left) > 1) {
-
+        Student* temp = node->right->left;
+        Student* rightSide = node->right;
+        node->right->left = node;
+        node->right = temp;
+        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+        return rightSide;
     }
     return node;
 }
