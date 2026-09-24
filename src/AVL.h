@@ -22,18 +22,39 @@ struct Student {
 class AVLTree {
 private:
     Student* root;
+    int getHeight(const Student* node);
+    int getBalance(Student* node);
+
+    Student* balance(Student* subRoot);
+    Student* rightRotate(Student* subRoot);
+    Student* leftRotate(Student* subRoot);
+    Student* insertNode(Student* subRoot, const string& name, const string& id);
+    Student* findNode(Student* subRoot, const string& id);
+    Student* findMin(Student* subRoot);
+
+    Student* removeNode(Student* subRoot, const string& id);
+    void inorderNames(Student* subRoot, vector<string>& result);
+    void preorderNames(Student* subRoot, vector<string>& result);
+    void postorderNames(Student* subRoot, vector<string>& result);
+
+    void inorderIDs(Student* subRoot, vector<string>& result);
+    void searchNameHelper(Student* subRoot, const string& name,
+                          vector<string>& result);
+    int countLevels(Student* subRoot);
+    void deleteTree(Student* subRoot);
 
 public:
     AVLTree();
-    static int getHeight(const Student* node);
-    static Student* balance(Student *subRoot);
-    Student* insert(const string &name, const string &id);
-    bool remove(string id);
-    string searchID(string id);
-    vector<string> searchName(string name);
+    ~AVLTree();
+    bool insert(const string& name, const string& id);
+    bool remove(const string& id);
+
+    string searchID(const string& id);
+    vector<string> searchName(const string& name);
     vector<string> inorder();
     vector<string> preorder();
     vector<string> postorder();
+
     int levelCount();
     bool removeInorder(int n);
 };

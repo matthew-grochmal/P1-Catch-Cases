@@ -26,6 +26,14 @@ int AVLTree::getHeight(const Student* node) {
     return node->height;
 }
 
+int AVLTree::getBalance(Student* node) {
+    if (node == nullptr) {
+        return 0;
+    }
+
+    return getHeight(node->left) - getHeight(node->right);
+}
+
 
 Student* AVLTree::balance(Student* subRoot) {
     AVLTree tempTree = AVLTree();
@@ -34,9 +42,10 @@ Student* AVLTree::balance(Student* subRoot) {
     if (getHeight(subRoot->left) - getHeight(subRoot->right) > 1) {
         //normal right rotation
         if (subRoot->left->right == nullptr) {
+            Student* tempNode = subRoot->left->right;
             tempTree.root = subRoot->left;
             tempTree.root->right = subRoot;
-            subRoot->left = nullptr;
+            subRoot->left = tempNode;
         }
         else {
             tempTree.root = subRoot->left->right;
@@ -44,13 +53,15 @@ Student* AVLTree::balance(Student* subRoot) {
             tempTree.insert(subRoot->name, subRoot->id);
         }
     }
+
     //left rotation or right-left rotation
     else if (getHeight(subRoot->right) - getHeight(subRoot->left) > 1) {
         //normal right rotation
         if (subRoot->right->left == nullptr) {
+            Student* tempNode = subRoot->right->left;
             tempTree.root = subRoot->right;
             tempTree.root->left = subRoot;
-            subRoot->right = nullptr;
+            subRoot->right = tempNode;
         }
         else {
             tempTree.root = subRoot->right->left;
