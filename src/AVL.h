@@ -25,7 +25,9 @@ private:
 
 public:
     AVLTree();
-    void insert(const string &name, const string &id);
+    static int getHeight(const Student* node);
+    static Student* balance(Student *node);
+    Student* insert(const string &name, const string &id);
     bool remove(string id);
     string searchID(string id);
     vector<string> searchName(string name);
