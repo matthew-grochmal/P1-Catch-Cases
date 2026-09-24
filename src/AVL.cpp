@@ -28,29 +28,37 @@ int AVLTree::getHeight(const Student* node) {
 
 
 Student* AVLTree::balance(Student* subRoot) {
+    AVLTree tempTree = AVLTree();
+
     //right rotation or left-right rotation
     if (getHeight(subRoot->left) - getHeight(subRoot->right) > 1) {
         //normal right rotation
         if (subRoot->left->right == nullptr) {
-            Student* newSubRoot = subRoot->left;
-            subRoot->left->right = subRoot;
+            tempTree.root = subRoot->left;
+            tempTree.root->right = subRoot;
             subRoot->left = nullptr;
         }
         else {
-            //WRONG NEEDS FIX
-            subRoot->left->right->left = subRoot->left;
+            tempTree.root = subRoot->left->right;
+            tempTree.insert(subRoot->left->name, subRoot->left->id);
+            tempTree.insert(subRoot->name, subRoot->id);
         }
     }
     //left rotation or right-left rotation
-    else if (getHeight(node->right) - getHeight(node->left) > 1) {
-        Student* temp = node->right->left;
-        Student* rightSide = node->right;
-        node->right->left = node;
-        node->right = temp;
-        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
-        return rightSide;
+    else if (getHeight(subRoot->right) - getHeight(subRoot->left) > 1) {
+        //normal right rotation
+        if (subRoot->right->left == nullptr) {
+            tempTree.root = subRoot->right;
+            tempTree.root->left = subRoot;
+            subRoot->right = nullptr;
+        }
+        else {
+            tempTree.root = subRoot->right->left;
+            tempTree.insert(subRoot->right->name, subRoot->right->id);
+            tempTree.insert(subRoot->name, subRoot->id);
+        }
     }
-    return node;
+    return tempTree.root;
 }
 
 Student* AVLTree::insert(const string &name, const string &id) {
