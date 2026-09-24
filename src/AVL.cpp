@@ -6,12 +6,19 @@
 
 #include <ios>
 #include <bits/ios_base.h>
+#include <algorithm>
+
+using namespace std;
 
 AVLTree::AVLTree() {
     root = nullptr;
 }
 
-Student::Student(string name, string id) {
+AVLTree::~AVLTree() {
+    deleteTree(root);
+}
+
+Student::Student(const string &name, const string &id) {
     this->name = name;
     this->id = id;
     left = nullptr;
@@ -26,7 +33,7 @@ int AVLTree::getHeight(const Student* node) {
     return node->height;
 }
 
-int AVLTree::getBalance(Student* node) {
+int AVLTree::getBalance(const Student* node) {
     if (node == nullptr) {
         return 0;
     }
@@ -35,114 +42,306 @@ int AVLTree::getBalance(Student* node) {
 }
 
 
+Student* AVLTree::rightRotate(Student* subRoot) {
+    Student* newRoot = subRoot->left;
+    Student* tempNode = newRoot->right;
+
+    newRoot->right = subRoot;
+    subRoot->left = tempNode;
+
+    subRoot->height = 1 + max(getHeight(subRoot->left),
+                              getHeight(subRoot->right));
+
+    newRoot->height = 1 + max(getHeight(newRoot->left),
+                              getHeight(newRoot->right));
+    return newRoot;
+}
+
+Student* AVLTree::leftRotate(Student* subRoot) {
+    Student* newRoot = subRoot->right;
+    Student* tempNode = newRoot->left;
+
+    newRoot->left = subRoot;
+    subRoot->right = tempNode;
+
+    subRoot->height = 1 + max(getHeight(subRoot->left),
+                              getHeight(subRoot->right));
+
+    newRoot->height = 1 + max(getHeight(newRoot->left),
+                              getHeight(newRoot->right));
+    return newRoot;
+}
+
 Student* AVLTree::balance(Student* subRoot) {
-    AVLTree tempTree = AVLTree();
-
-    //right rotation or left-right rotation
-    if (getHeight(subRoot->left) - getHeight(subRoot->right) > 1) {
-        //normal right rotation
-        if (subRoot->left->right == nullptr) {
-            Student* tempNode = subRoot->left->right;
-            tempTree.root = subRoot->left;
-            tempTree.root->right = subRoot;
-            subRoot->left = tempNode;
-        }
-        else {
-            tempTree.root = subRoot->left->right;
-            tempTree.insert(subRoot->left->name, subRoot->left->id);
-            tempTree.insert(subRoot->name, subRoot->id);
-        }
+    if (subRoot == nullptr) {
+        return nullptr;
     }
 
-    //left rotation or right-left rotation
-    else if (getHeight(subRoot->right) - getHeight(subRoot->left) > 1) {
-        //normal right rotation
-        if (subRoot->right->left == nullptr) {
-            Student* tempNode = subRoot->right->left;
-            tempTree.root = subRoot->right;
-            tempTree.root->left = subRoot;
-            subRoot->right = tempNode;
+    subRoot->height = 1 + max(getHeight(subRoot->left),
+                              getHeight(subRoot->right));
+
+    int balanceFactor = getBalance(subRoot);
+
+
+    // Left heavy
+    if (balanceFactor > 1) {
+
+        // LR case
+        if (getBalance(subRoot->left) < 0) {
+            subRoot->left = leftRotate(subRoot->left);
         }
-        else {
-            tempTree.root = subRoot->right->left;
-            tempTree.insert(subRoot->right->name, subRoot->right->id);
-            tempTree.insert(subRoot->name, subRoot->id);
-        }
+        // LL case
+        return rightRotate(subRoot);
     }
-    return tempTree.root;
+
+    // Right heavy
+    if (balanceFactor < -1) {
+
+        // RL case
+        if (getBalance(subRoot->right) > 0) {
+            subRoot->right = rightRotate(subRoot->right);
+        }
+        // RR case
+        return leftRotate(subRoot);
+    }
+    return subRoot;
 }
 
-Student* AVLTree::insert(const string &name, const string &id) {
-    //for root creation
-    if (root == nullptr) {
-        root = new Student (name, id);
-        return root;
+Student* AVLTree::insertNode(Student* subRoot,
+                             const string& name,
+                             const string& id) {
+    if (subRoot == nullptr) {
+        return new Student(name, id);
     }
 
-    //recursive call, moves us down the tree checking left or right
+    if (id < subRoot->id) {
+        subRoot->left = insertNode(subRoot->left, name, id);
+    }
+    else if (id > subRoot->id) {
+        subRoot->right = insertNode(subRoot->right, name, id);
+    }
+    return balance(subRoot);
+}
+
+bool AVLTree::insert(const string& name, const string& id) {
+    if (findNode(root, id) != nullptr) {
+        return false;
+    }
+    root = insertNode(root, name, id);
+
+    return true;
+}
+
+Student* AVLTree::findNode(Student* subRoot, const string& id) {
+    if (subRoot == nullptr) {
+        return nullptr;
+    }
+
+    if (id == subRoot->id) {
+        return subRoot;
+    }
+
+    if (id < subRoot->id) {
+        return findNode(subRoot->left, id);
+    }
+    return findNode(subRoot->right, id);
+}
+
+Student* AVLTree::findMin(Student* subRoot) {
+    Student* current = subRoot;
+
+    while (current != nullptr && current->left != nullptr) {
+        current = current->left;
+    }
+    return current;
+}
+
+Student* AVLTree::removeNode(Student* subRoot, const string& id) {
+    if (subRoot == nullptr) {
+        return nullptr;
+    }
+
+    if (id < subRoot->id) {
+        subRoot->left = removeNode(subRoot->left, id);
+    }
+    else if (id > subRoot->id) {
+        subRoot->right = removeNode(subRoot->right, id);
+    }
     else {
-        Student* current = root;
 
-        //moves us left or right
-        if (id < current->id) {
-            //if empty, fills, if not, moves down one and checks again
-            if (current->left == nullptr) {
-                current->left = new Student (name, id);
-            }
-            else {
-                current = current->left;
-                insert(name, id);
-            }
+        // No children
+        if (subRoot->left == nullptr && subRoot->right == nullptr) {
+            delete subRoot;
+            return nullptr;
         }
-        else {
-            //if empty, fills, if not, moves down one and checks again
-            if (current->right == nullptr) {
-                current->right = new Student (name, id);
-            }
-            else {
-                current = current->right;
-                insert(name, id);
-            }
+
+        // One right child
+        if (subRoot->left == nullptr) {
+            Student* tempNode = subRoot->right;
+            delete subRoot;
+            return tempNode;
+        }
+
+        // One left child
+        if (subRoot->right == nullptr) {
+            Student* tempNode = subRoot->left;
+            delete subRoot;
+            return tempNode;
         }
 
 
-        //rechecks height and balance if needed
-        current = balance(current);
-        current->height = 1 + max(getHeight(current->left), getHeight(current->right));
-        return current;
+
+        // Two children
+        // Use inorder successor
+        Student* successor = findMin(subRoot->right);
+
+        subRoot->name = successor->name;
+        subRoot->id = successor->id;
+
+        subRoot->right = removeNode(subRoot->right, successor->id);
     }
 
-
+    return balance(subRoot);
 }
 
-bool AVLTree::remove(string id) {
-    return false;
+bool AVLTree::remove(const string& id) {
+    if (findNode(root, id) == nullptr) {
+        return false;
+    }
+
+    root = removeNode(root, id);
+
+    return true;
 }
 
-string AVLTree::searchID(string id) {
-    return "";
+string AVLTree::searchID(const string& id) const {
+    Student* result = findNode(root, id);
+
+    if (result == nullptr) {
+        return "";
+    }
+
+    return result->name;
 }
 
-vector<string> AVLTree::searchName(string name) {
-    return {};
+void AVLTree::searchNameHelper(const Student* subRoot,
+                                const string& name,
+                                vector<string>& result) {
+    if (subRoot == nullptr) {
+        return;
+    }
+
+    // Preorder
+    if (subRoot->name == name) {
+        result.push_back(subRoot->id);
+    }
+
+    searchNameHelper(subRoot->left, name, result);
+    searchNameHelper(subRoot->right, name, result);
 }
 
-vector<string> AVLTree::inorder() {
-    return {};
+vector<string> AVLTree::searchName(const string& name) const {
+    vector<string> result;
+
+    searchNameHelper(root, name, result);
+
+    return result;
 }
 
-vector<string> AVLTree::preorder() {
-    return {};
+void AVLTree::inorderNames(const Student* subRoot, vector<string>& result) {
+    if (subRoot == nullptr) {
+        return;
+    }
+
+    inorderNames(subRoot->left, result);
+    result.push_back(subRoot->name);
+    inorderNames(subRoot->right, result);
 }
 
-vector<string> AVLTree::postorder() {
-    return {};
+vector<string> AVLTree::inorder() const {
+    vector<string> result;
+
+    inorderNames(root, result);
+
+    return result;
 }
 
-int AVLTree::levelCount() {
-    return 0;
+void AVLTree::preorderNames(const Student* subRoot, vector<string>& result) {
+    if (subRoot == nullptr) {
+        return;
+    }
+
+    result.push_back(subRoot->name);
+    preorderNames(subRoot->left, result);
+    preorderNames(subRoot->right, result);
+}
+
+vector<string> AVLTree::preorder() const {
+    vector<string> result;
+    preorderNames(root, result);
+    return result;
+}
+
+void AVLTree::postorderNames(const Student* subRoot, vector<string>& result) {
+    if (subRoot == nullptr) {
+        return;
+    }
+    postorderNames(subRoot->left, result);
+    postorderNames(subRoot->right, result);
+    result.push_back(subRoot->name);
+}
+
+vector<string> AVLTree::postorder() const {
+    vector<string> result;
+
+    postorderNames(root, result);
+
+    return result;
+}
+
+void AVLTree::inorderIDs(const Student* subRoot, vector<string>& result) {
+    if (subRoot == nullptr) {
+        return;
+    }
+
+    inorderIDs(subRoot->left, result);
+    result.push_back(subRoot->id);
+    inorderIDs(subRoot->right, result);
 }
 
 bool AVLTree::removeInorder(int n) {
-    return false;
+    vector<string> ids;
+
+    inorderIDs(root, ids);
+
+    if (n < 0 || n >= static_cast<int>(ids.size())) {
+        return false;
+    }
+
+    return remove(ids[n]);
+}
+
+int AVLTree::countLevels(const Student* subRoot) {
+    if (subRoot == nullptr) {
+        return 0;
+    }
+
+    int leftLevels = countLevels(subRoot->left);
+    int rightLevels = countLevels(subRoot->right);
+
+    return 1 + max(leftLevels, rightLevels);
+}
+
+int AVLTree::levelCount() const {
+    return countLevels(root);
+}
+
+void AVLTree::deleteTree(const Student* subRoot) {
+    if (subRoot == nullptr) {
+        return;
+    }
+
+    deleteTree(subRoot->left);
+    deleteTree(subRoot->right);
+    delete subRoot;
 }
