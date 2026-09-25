@@ -53,6 +53,7 @@ public:
     vector<string> postorder() const;
     int levelCount() const;
     bool removeInorder(int n);
+    vector<string> inorderIDs();
 };
 
 #endif

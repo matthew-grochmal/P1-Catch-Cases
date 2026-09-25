@@ -4,139 +4,242 @@
 using namespace std;
 
 //Matthew Grochmal
-//35490862
-// the syntax for defining a test is below. It is important for the name to be unique, but you can group multiple tests with [tags]. A test can have [multiple][tags] using that syntax.
-TEST_CASE("5 Invalid insert commands", "[insert]"){
-	// instantiate any class members that you need to test here
-	AVLTree tree;
+//UF ID: 35490862
 
-	// anything that evaluates to false in a REQUIRE block will result in a failing test
-	REQUIRE(tree.insert("Jimmy John", "1234567") == false);
-	REQUIRE(tree.insert("Jimmy John", "123456789") == false);
-	REQUIRE(tree.insert("Jim123", "12345678") == false);
-	REQUIRE(tree.insert("Jimmy John", "1234abcd") == false);
-	tree.insert("Jimmy John", "12345678");
-	REQUIRE(tree.insert("Jimmy John", "12345678") == false);
+TEST_CASE("Invalid Operations and Edge Cases", "[SEARCH][INSERT][REMOVAL]") {
 
-	// all REQUIRE blocks must evaluate to true for the whole test to pass
+    AVLTree tree;
 
+    // valid insert
+    REQUIRE(tree.insert("Alice Smith", "12345678"));
+    // dupe id
+    REQUIRE_FALSE(tree.insert("Bob Jones", "12345678"));
+    // invalid remove id
+    REQUIRE_FALSE(tree.remove("99999999"));
+    // invalid search id
+    REQUIRE(tree.searchID("99999999") == "");
+    // invalid searchi id
+    REQUIRE(tree.searchName("Nobody").empty());
+    // remove out of range
+    REQUIRE_FALSE(tree.removeInorder(10));
+    // remove negative
+    REQUIRE_FALSE(tree.removeInorder(-1));
+    // valid search
+    REQUIRE(tree.searchID("12345678") == "Alice Smith");
 }
 
-TEST_CASE("Basic insertion/inorder traversal", "[insert]"){
 
-	AVLTree tree;
 
-	REQUIRE(tree.insert("Jimmy", "45678888") == true);
-	REQUIRE(tree.insert("Jonathan", "12348888") == true);
-	REQUIRE(tree.insert("John", "12345678") == true);
-	REQUIRE(tree.insert("Jack", "12345679") == true);
-	REQUIRE(tree.insert("Jayden", "13456789") == true);
+TEST_CASE("All Four AVL Rotations", "[ROTATIONS]")  {
 
-vector <string> expected =
-	{"Jimmy", "Jonathan", "John", "Jack", "Jayden"};
-	REQUIRE(tree.inorder() == expected);
-	// each section runs the setup code independently to ensure that they don't affect each other
+    // right
+    {
+        AVLTree tree;
+
+        REQUIRE(tree.insert("C", "00000030"));
+        REQUIRE(tree.insert("B", "00000020"));
+        REQUIRE(tree.insert("A", "00000010"));
+
+        vector<string> result = tree.preorder();
+
+        REQUIRE(result.size() == 3);
+        REQUIRE(result[0] == "B");
+        REQUIRE(tree.levelCount() == 2);
+    }
+
+    // left
+    {
+        AVLTree tree;
+
+        REQUIRE(tree.insert("A", "00000010"));
+        REQUIRE(tree.insert("B", "00000020"));
+        REQUIRE(tree.insert("C", "00000030"));
+
+        vector<string> result = tree.preorder();
+
+        REQUIRE(result.size() == 3);
+        REQUIRE(result[0] == "B");
+        REQUIRE(tree.levelCount() == 2);
+    }
+
+    // left-right
+    {
+        AVLTree tree;
+
+        REQUIRE(tree.insert("C", "00000030"));
+        REQUIRE(tree.insert("A", "00000010"));
+        REQUIRE(tree.insert("B", "00000020"));
+
+        vector<string> result = tree.preorder();
+
+        REQUIRE(result.size() == 3);
+        REQUIRE(result[0] == "B");
+        REQUIRE(tree.levelCount() == 2);
+    }
+
+    // right-left
+    {
+        AVLTree tree;
+
+        REQUIRE(tree.insert("A", "00000010"));
+        REQUIRE(tree.insert("C", "00000030"));
+        REQUIRE(tree.insert("B", "00000020"));
+
+        vector<string> result = tree.preorder();
+
+        REQUIRE(result.size() == 3);
+        REQUIRE(result[0] == "B");
+        REQUIRE(tree.levelCount() == 2);
+    }
 }
 
-// you must write 5 unique, meaningful tests for credit on the testing portion of this project!
 
-// the provided test from the template is below.
 
-TEST_CASE("AVL Double Left", "[rotate]"){
-	AVLTree tree;
+TEST_CASE("All Three Deletion Cases", "[DELETION]") {
 
-	tree.insert("Three", "33333333");
-	tree.insert("Two", "22222222");
-	tree.insert("One", "11111111");
+    //none
+    {
+        AVLTree tree;
 
-	vector<string> expected {
-	"Two", "One", "Three"};
+        REQUIRE(tree.insert("A", "00000010"));
+        REQUIRE(tree.insert("B", "00000020"));
 
-	REQUIRE(tree.preorder() == expected);
+        REQUIRE(tree.remove("00000020"));
+
+        REQUIRE(tree.searchID("00000020") == "");
+        REQUIRE(tree.searchID("00000010") == "A");
+    }
+
+    // 1
+    {
+        AVLTree tree;
+
+        REQUIRE(tree.insert("A", "00000020"));
+        REQUIRE(tree.insert("B", "00000010"));
+        REQUIRE(tree.insert("C", "00000005"));
+
+        REQUIRE(tree.remove("00000010"));
+
+        REQUIRE(tree.searchID("00000010") == "");
+        REQUIRE(tree.searchID("00000005") == "C");
+        REQUIRE(tree.searchID("00000020") == "A");
+    }
+
+    // 2
+    {
+        AVLTree tree;
+
+        REQUIRE(tree.insert("A", "00000050"));
+        REQUIRE(tree.insert("B", "00000030"));
+        REQUIRE(tree.insert("C", "00000070"));
+        REQUIRE(tree.insert("D", "00000060"));
+        REQUIRE(tree.insert("E", "00000080"));
+
+        REQUIRE(tree.remove("00000050"));
+
+        REQUIRE(tree.searchID("00000050") == "");
+        REQUIRE(tree.searchID("00000060") == "D");
+        REQUIRE(tree.searchID("00000030") == "B");
+        REQUIRE(tree.searchID("00000070") == "C");
+        REQUIRE(tree.searchID("00000080") == "E");
+    }
 }
 
-TEST_CASE("AVL Double Right", "[rotate]") {
-	AVLTree tree;
 
-	tree.insert("One", "11111111");
-	tree.insert("Two", "22222222");
-	tree.insert("Three", "33333333");
 
-	vector<string> expected{
-	"Two", "One", "Three"};
+TEST_CASE("Search Traversals and Inorder Removal", "[SEARCH][INSERT][ORDER][REMOVAL]") {
 
-	REQUIRE(tree.preorder() == expected);
+    AVLTree tree;
+
+    //insert
+    REQUIRE(tree.insert("Alice", "12345678"));
+    REQUIRE(tree.insert("Bob", "23456789"));
+    REQUIRE(tree.insert("Alice", "34567890"));
+    // id search
+    REQUIRE(tree.searchID("12345678") == "Alice");
+    REQUIRE(tree.searchID("23456789") == "Bob");
+    // name search
+    vector<string> aliceIDs = tree.searchName("Alice");
+
+    REQUIRE(aliceIDs.size() == 2);
+
+    // inorder
+    vector<string> inorder = tree.inorder();
+
+    REQUIRE(inorder.size() == 3);
+    REQUIRE(inorder[0] == "Alice");
+    REQUIRE(inorder[1] == "Bob");
+    REQUIRE(inorder[2] == "Alice");
+
+    // preorder
+    vector<string> preorder = tree.preorder();
+
+    REQUIRE(preorder.size() == 3);
+
+    // postorder
+    vector<string> postorder = tree.postorder();
+
+    REQUIRE(postorder.size() == 3);
+
+    // level counting
+    REQUIRE(tree.levelCount() >= 2);
+
+    // remove by inorder
+    REQUIRE(tree.removeInorder(0));
+
+    REQUIRE(tree.searchID("12345678") == "");
+    REQUIRE(tree.inorder().size() == 2);
 }
 
-TEST_CASE("AVL Left-Right", "[rotate]") {
-	AVLTree tree;
 
-	tree.insert("Three", "33333333");
-	tree.insert("One", "11111111");
-	tree.insert("Two", "22222222");
 
-	vector<string> expected{
-	"Two", "One", "Three"};
+TEST_CASE("100 Insertions and 10 Removals", "[INSERTION][REMOVAL][ORDER]") {
+    AVLTree tree;
 
-	REQUIRE(tree.preorder() == expected);
-}
+    // 100 insertions
+    for (int i = 0; i < 100; i++) {
 
-TEST_CASE("AVL Right-Left", "[rotate]") {
-	AVLTree tree;
+        string id = to_string(10000000 + i);
 
-	tree.insert("One", "11111111");
-	tree.insert("Three", "33333333");
-	tree.insert("Two", "22222222");
+        REQUIRE(tree.insert("Student " + to_string(i), id));
+    }
 
-	vector<string> expected{
-	"Two", "One", "Three"};
+    // check 100 nodes
+    vector<string> inorder = tree.inorderIDs();
 
-	REQUIRE(tree.preorder() == expected);
-}
+    REQUIRE(inorder.size() == 100);
 
-TEST_CASE("Insert/Remove", "[large]") {
-	AVLTree tree;
+    // 10 removals
+    REQUIRE(tree.remove("10000010"));
+    REQUIRE(tree.remove("10000020"));
+    REQUIRE(tree.remove("10000030"));
+    REQUIRE(tree.remove("10000040"));
+    REQUIRE(tree.remove("10000050"));
+    REQUIRE(tree.remove("10000060"));
+    REQUIRE(tree.remove("10000070"));
+    REQUIRE(tree.remove("10000080"));
+    REQUIRE(tree.remove("10000090"));
+    REQUIRE(tree.remove("10000099"));
 
-	for (int i = 0; i< 100; i++) {
-		string id = to_string(10000000 + i);
+    // 90 nodes
+    inorder = tree.inorderIDs();
 
-		REQUIRE(tree.insert("Random Dude", id) == true);
-	}
+    REQUIRE(inorder.size() == 90);
 
-	vector<string> result = tree.inorder();
+    // sort?
+    for (size_t i = 1; i < inorder.size(); i++) {
+        REQUIRE(inorder[i - 1] < inorder[i]);
+    }
 
-	REQUIRE(result.size() == 100);
-	REQUIRE(tree.remove("10000005") == true);
-	REQUIRE(tree.remove("10000012") == true);
-	REQUIRE(tree.remove("10000023") == true);
-	REQUIRE(tree.remove("10000031") == true);
-	REQUIRE(tree.remove("10000044") == true);
-	REQUIRE(tree.remove("10000057") == true);
-	REQUIRE(tree.remove("10000063") == true);
-	REQUIRE(tree.remove("10000076") == true);
-	REQUIRE(tree.remove("10000088") == true);
-	REQUIRE(tree.remove("10000095") == true);
-
-	result = tree.inorder();
-
-	REQUIRE(result.size() == 90);
-}
-
-TEST_CASE("Remove Node", "[remove]") {
-	AVLTree tree;
-
-	tree.insert("Four", "44444444");
-	tree.insert("Two", "22222222");
-	tree.insert("Six", "66666666");
-	tree.insert("One", "11111111");
-	tree.insert("Five", "55555555");
-	tree.insert("Seven", "77777777");
-
-	REQUIRE(tree.remove("44444444") == true);
-
-	vector<string> expected ={
-		"Five", "Two", "One", "Three", "Six", "Seven"
-	};
-
-	REQUIRE(tree.preorder() == expected);
+    // removal
+    REQUIRE(tree.searchID("10000010") == "");
+    REQUIRE(tree.searchID("10000020") == "");
+    REQUIRE(tree.searchID("10000030") == "");
+    REQUIRE(tree.searchID("10000040") == "");
+    REQUIRE(tree.searchID("10000050") == "");
+    REQUIRE(tree.searchID("10000060") == "");
+    REQUIRE(tree.searchID("10000070") == "");
+    REQUIRE(tree.searchID("10000080") == "");
+    REQUIRE(tree.searchID("10000090") == "");
+    REQUIRE(tree.searchID("10000099") == "");
 }

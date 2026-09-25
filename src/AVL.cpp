@@ -309,6 +309,14 @@ void AVLTree::inorderIDs(const Student* subRoot, vector<string>& result) {
     inorderIDs(subRoot->right, result);
 }
 
+vector<string> AVLTree::inorderIDs() {
+    vector<string> result;
+
+    inorderIDs(root, result);
+
+    return result;
+}
+
 bool AVLTree::removeInorder(int n) {
     vector<string> ids;
 
