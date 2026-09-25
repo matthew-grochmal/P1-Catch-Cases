@@ -116,13 +116,15 @@ TEST_CASE("All Three Deletion Cases", "[DELETION]") {
 
         REQUIRE(tree.insert("A", "00000020"));
         REQUIRE(tree.insert("B", "00000010"));
-        REQUIRE(tree.insert("C", "00000005"));
+        REQUIRE(tree.insert("C", "00000030"));
+        REQUIRE(tree.insert("D", "00000005"));
 
         REQUIRE(tree.remove("00000010"));
 
         REQUIRE(tree.searchID("00000010") == "");
-        REQUIRE(tree.searchID("00000005") == "C");
+        REQUIRE(tree.searchID("00000005") == "D");
         REQUIRE(tree.searchID("00000020") == "A");
+        REQUIRE(tree.searchID("00000030") == "C");
     }
 
     // 2
